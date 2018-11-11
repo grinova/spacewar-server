@@ -12,12 +12,14 @@ import (
 var (
 	port      = flag.String("p", "3000", "port to serve on")
 	directory = flag.String("d", ".", "the directory of static file to host")
+	noSync    = flag.Bool("no-sync", false, "switch off synchronization")
 )
 
 func main() {
 	flag.Parse()
 
 	server := spacewar.Server{}
+	server.Synchronization = !*noSync
 	server.Start()
 
 	var upgrader = websocket.Upgrader{
