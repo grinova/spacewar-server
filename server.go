@@ -3,6 +3,7 @@ package spacewar
 import (
 	"fmt"
 	"log"
+	"math"
 
 	physicsnet "github.com/grinova/physicsnet-server"
 )
@@ -16,8 +17,13 @@ var shipProps = map[string]physicsnet.BodyCreateProps{
 	"ship-b": physicsnet.BodyCreateProps{
 		ID:       "ship-b",
 		Position: physicsnet.Point{X: 0.5, Y: 0.5},
-		Angle:    0,
+		Angle:    math.Pi,
 	},
+}
+
+type systemProps struct {
+	Type string `json:"type"`
+	Data string `json:"data"`
 }
 
 // Server - сервер игры
@@ -49,9 +55,10 @@ func (s *Server) Start() {
 		OnServerStop: func(s *physicsnet.Server) {
 			log.Println("Server stop")
 		},
-		OnClientConnect: func(s *physicsnet.Server, id string) error {
+		OnClientConnect: func(s *physicsnet.Server, id string, c *physicsnet.Client) error {
 			if props, ok := shipProps[id]; ok {
 				s.CreateEntity(id, "ship", props)
+				c.SendSystemMessage(systemProps{Type: "user-name", Data: id})
 				log.Printf("Client connect: id = %s\n", id)
 				return nil
 			}
