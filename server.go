@@ -35,6 +35,7 @@ type Server struct {
 func (s *Server) Start() {
 	listener := physicsnet.ServerListener{
 		OnServerStart: func(s *physicsnet.Server) {
+			s.GetWorld().SetContactListener(contactListener{server: s})
 			s.GetBodyRegistrator().Register("arena", func(v interface{}) interface{} {
 				return createArenaBody(s.GetWorld(), v)
 			})
