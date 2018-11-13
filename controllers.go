@@ -3,8 +3,8 @@ package spacewar
 import (
 	"time"
 
-	"github.com/grinova/classic2d-server/physics"
 	"github.com/grinova/classic2d-server/vmath"
+	physicsnet "github.com/grinova/physicsnet-server"
 )
 
 const (
@@ -14,14 +14,13 @@ const (
 )
 
 type shipController struct {
+	physicsnet.BaseController
 	thrust float64
 	torque float64
-	// FIXME: Костыль
-	body *physics.Body
 }
 
-func (c *shipController) Step(body *physics.Body, d time.Duration) {
-	c.body = body
+func (c *shipController) Step(d time.Duration) {
+	body := c.GetBody()
 	force := vmath.Vec2{X: 0, Y: c.thrust}.Rotate(body.GetRot())
 	body.ApplyForce(force.Mul(shipMaxForce))
 	body.SetTorque(c.torque * shipMaxTorque)
@@ -29,10 +28,10 @@ func (c *shipController) Step(body *physics.Body, d time.Duration) {
 }
 
 func (c *shipController) getNewRocketProps() rocketProps {
-	ship := c.body
-	position := vmath.Vec2{X: 0, Y: rocketStartDistance}.Rotate(ship.GetRot()).Add(ship.GetPosition())
-	angle := ship.GetAngle()
-	linearVelocity := vmath.Vec2{X: 0, Y: rocketStartVelocity}.Rotate(ship.GetRot()).Add(ship.LinearVelocity)
+	body := c.GetBody()
+	position := vmath.Vec2{X: 0, Y: rocketStartDistance}.Rotate(body.GetRot()).Add(body.GetPosition())
+	angle := body.GetAngle()
+	linearVelocity := vmath.Vec2{X: 0, Y: rocketStartVelocity}.Rotate(body.GetRot()).Add(body.LinearVelocity)
 	return rocketProps{position: position, angle: angle, linearVelocity: linearVelocity}
 }
 
@@ -41,9 +40,11 @@ const (
 )
 
 type rocketController struct {
+	physicsnet.BaseController
 }
 
-func (c rocketController) Step(body *physics.Body, d time.Duration) {
+func (c *rocketController) Step(d time.Duration) {
+	body := c.GetBody()
 	force := vmath.Vec2{X: 0, Y: rocketForce}.Rotate(body.GetRot())
 	body.ApplyForce(force)
 }

@@ -63,7 +63,7 @@ func createShipActor(v interface{}) interface{} {
 }
 
 func createRocketController(v interface{}) interface{} {
-	return rocketController{}
+	return &rocketController{}
 }
 
 func createRocketActor(v interface{}) interface{} {
