@@ -1,8 +1,7 @@
 package spacewar
 
 import (
-	"github.com/grinova/actors"
-	physicsnet "github.com/grinova/physicsnet-server"
+	net "github.com/grinova/physicsnet-server"
 )
 
 const (
@@ -13,10 +12,10 @@ const (
 type shipActor struct {
 }
 
-func (a shipActor) OnInit(c physicsnet.Controller, selfID actors.ActorID, send actors.Send, spawn physicsnet.Spawn, exit actors.Exit) {
+func (a shipActor) OnInit(c net.Controller, selfID net.ActorID, send net.Send, spawn net.Spawn, exit net.Exit) {
 }
 
-func (a shipActor) OnMessage(c physicsnet.Controller, m actors.Message, send actors.Send, spawn physicsnet.Spawn, exit actors.Exit) {
+func (a shipActor) OnMessage(c net.Controller, m net.Message, send net.Send, spawn net.Spawn, exit net.Exit) {
 	if ship, ok := c.(*shipController); ok {
 		if msg, ok := m.(map[string]interface{}); ok {
 			switch msg["type"] {
@@ -38,8 +37,8 @@ func (a shipActor) OnMessage(c physicsnet.Controller, m actors.Message, send act
 type rocketActor struct {
 }
 
-func (a rocketActor) OnInit(c physicsnet.Controller, selfID actors.ActorID, send actors.Send, spawn physicsnet.Spawn, exit actors.Exit) {
+func (a rocketActor) OnInit(c net.Controller, selfID net.ActorID, send net.Send, spawn net.Spawn, exit net.Exit) {
 }
 
-func (a rocketActor) OnMessage(c physicsnet.Controller, m actors.Message, send actors.Send, spawn physicsnet.Spawn, exit actors.Exit) {
+func (a rocketActor) OnMessage(c net.Controller, m net.Message, send net.Send, spawn net.Spawn, exit net.Exit) {
 }
