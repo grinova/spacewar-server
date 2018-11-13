@@ -29,12 +29,23 @@ type systemProps struct {
 // Server - сервер игры
 type Server struct {
 	physicsnet.Server
+	clients map[string]struct{}
 }
 
 // Start - запуск сервера
-func (s *Server) Start() {
+func (server *Server) Start() {
+	server.clients = make(map[string]struct{})
 	listener := physicsnet.ServerListener{
 		OnServerStart: func(s *physicsnet.Server) {
+			s.Props.NewID = func() (string, error) {
+				for i := 'a'; i < 'z'; i++ {
+					id := "ship-" + string(i)
+					if _, ok := server.clients[id]; !ok {
+						return id, nil
+					}
+				}
+				return "", fmt.Errorf("genNewID: can't generate new id")
+			}
 			s.GetWorld().SetContactListener(contactListener{server: s})
 			s.GetBodyRegistrator().Register("arena", func(v interface{}) interface{} {
 				return createArenaBody(s.GetWorld(), v)
@@ -60,12 +71,14 @@ func (s *Server) Start() {
 			if props, ok := shipProps[id]; ok {
 				s.CreateEntity(id, "ship", props)
 				c.SendSystemMessage(systemProps{Type: "user-name", Data: id})
+				server.clients[id] = struct{}{}
 				log.Printf("Client connect: id = %s\n", id)
 				return nil
 			}
 			return fmt.Errorf("onClientConnect: didn't find initial properties for ship id `%s`", id)
 		},
 		OnClientDisconnect: func(s *physicsnet.Server, id string) {
+			delete(server.clients, id)
 			s.DestroyEntity(id)
 			log.Printf("Client disconnect: id = %s\n", id)
 		},
@@ -78,6 +91,6 @@ func (s *Server) Start() {
 			return true
 		},
 	}
-	s.SetListener(listener)
-	go s.Loop()
+	server.SetListener(listener)
+	go server.Loop()
 }

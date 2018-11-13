@@ -19,7 +19,7 @@ func main() {
 	flag.Parse()
 
 	server := spacewar.Server{}
-	server.Synchronization = !*noSync
+	server.Props.Synchronization = !*noSync
 	server.Start()
 
 	var upgrader = websocket.Upgrader{
