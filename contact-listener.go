@@ -14,13 +14,13 @@ func (l contactListener) BeginContact(c *dynamic.Contact) {
 		if userDataB, ok := c.BodyB.UserData.(UserData); ok {
 			typeA := userDataA.Type
 			typeB := userDataB.Type
-			if typeA == "arena" && typeB == "rocket" || typeA == "black-hole" && (typeB == "arena" || typeB == "rocket") {
+			if typeA == "arena" && typeB == "rocket" ||
+				typeA == "black-hole" && (typeB == "ship" || typeB == "rocket") {
 				l.server.DestroyBody(c.BodyB)
 				l.server.DestroyContact(c)
-			} else if typeB == "arena" && typeA == "rocket" || typeB == "black-hole" && (typeA == "arena" || typeA == "rocket") {
-				l.server.DestroyBody(c.BodyA)
-				l.server.DestroyContact(c)
-			} else if typeA == "ship" && typeB == "rocket" || typeB == "ship" && typeA == "rocket" {
+			} else if typeA == "ship" && typeB == "rocket" ||
+				typeB == "ship" && typeA == "rocket" ||
+				typeA == "rocket" && typeB == "rocket" {
 				l.server.DestroyBody(c.BodyA)
 				l.server.DestroyBody(c.BodyB)
 				l.server.DestroyContact(c)
