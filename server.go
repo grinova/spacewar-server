@@ -78,6 +78,13 @@ func (server *Server) Start() {
 			return fmt.Errorf("onClientConnect: didn't find initial properties for ship id `%s`", id)
 		},
 		OnClientDisconnect: func(s *physicsnet.Server, id string) {
+			opponentName := server.clients[id]
+			for clientID := range server.clients {
+				if clientID != id {
+					c := s.GetClient(clientID)
+					c.SendSystemMessage(systemProps{Type: "opponent-leave", Data: opponentName})
+				}
+			}
 			delete(server.clients, id)
 			s.DestroyEntity(id)
 			log.Printf("Client disconnect: id = %s\n", id)
@@ -93,13 +100,13 @@ func (server *Server) Start() {
 						server.clients[id] = opponentName
 						if len(server.clients) > 1 {
 							opponent := s.GetClient(id)
-							for clientID, client := range server.clients {
+							for clientID, clientName := range server.clients {
 								if clientID != id {
 									c := s.GetClient(clientID)
 									if c != nil {
 										c.SendSystemMessage(systemProps{Type: "opponent-join", Data: opponentName})
 									}
-									opponent.SendSystemMessage(systemProps{Type: "opponent-join", Data: client})
+									opponent.SendSystemMessage(systemProps{Type: "opponent-join", Data: clientName})
 								}
 							}
 						}
