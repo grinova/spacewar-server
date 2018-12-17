@@ -22,8 +22,13 @@ var shipProps = map[string]physicsnet.BodyCreateProps{
 }
 
 type systemProps struct {
-	Type string `json:"type"`
-	Data string `json:"data"`
+	Type string      `json:"type"`
+	Data interface{} `json:"data"`
+}
+
+type scoreProps struct {
+	PlayerName string `json:"playerName"`
+	Amount     int    `json:"amount"`
 }
 
 // Server - сервер игры
@@ -46,7 +51,7 @@ func (server *Server) Start() {
 				}
 				return "", fmt.Errorf("genNewID: can't generate new id")
 			}
-			s.GetWorld().SetContactListener(contactListener{server: s})
+			s.GetWorld().SetContactListener(contactListener{server: server})
 			s.GetBodyRegistrator().Register("arena", func(v interface{}) interface{} {
 				return createArenaBody(s.GetWorld(), v)
 			})
@@ -119,4 +124,18 @@ func (server *Server) Start() {
 	}
 	server.SetListener(listener)
 	go server.Loop()
+}
+
+func (server *Server) onDestroyShip(destroyerID string, destroyedID string) {
+	var amount int
+	if destroyerID == destroyedID {
+		amount = -1
+	} else {
+		amount = 1
+	}
+	playerName := server.clients[destroyerID]
+	for clientID := range server.clients {
+		c := server.GetClient(clientID)
+		c.SendSystemMessage(systemProps{Type: "score", Data: scoreProps{PlayerName: playerName, Amount: amount}})
+	}
 }

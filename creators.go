@@ -48,7 +48,7 @@ func createRocketBody(w *dynamic.World, v interface{}) interface{} {
 		shape := shapes.CircleShape{Radius: RADIUS}
 		fixtureDef := physics.FixtureDef{Shape: shape, Density: 1}
 		body.SetFixture(fixtureDef)
-		body.UserData = UserData{Type: "rocket"}
+		body.UserData = UserData{Type: "rocket", Owner: props.owner}
 		return body
 	}
 	return nil

@@ -32,7 +32,11 @@ func (c *shipController) getNewRocketProps() rocketProps {
 	position := vmath.Vec2{X: 0, Y: rocketStartDistance}.Rotate(body.GetRot()).Add(body.GetPosition())
 	angle := body.GetAngle()
 	linearVelocity := vmath.Vec2{X: 0, Y: rocketStartVelocity}.Rotate(body.GetRot()).Add(body.LinearVelocity)
-	return rocketProps{position: position, angle: angle, linearVelocity: linearVelocity}
+	var owner string
+	if userData, ok := body.UserData.(UserData); ok {
+		owner = userData.ID
+	}
+	return rocketProps{position: position, angle: angle, linearVelocity: linearVelocity, owner: owner}
 }
 
 const (

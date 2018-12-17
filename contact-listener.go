@@ -2,11 +2,10 @@ package spacewar
 
 import (
 	"github.com/grinova/classic2d-server/dynamic"
-	physicsnet "github.com/grinova/physicsnet-server"
 )
 
 type contactListener struct {
-	server *physicsnet.Server
+	server *Server
 }
 
 func (l contactListener) BeginContact(c *dynamic.Contact) {
@@ -24,6 +23,12 @@ func (l contactListener) BeginContact(c *dynamic.Contact) {
 				l.server.DestroyBody(c.BodyA)
 				l.server.DestroyBody(c.BodyB)
 				l.server.DestroyContact(c)
+				if typeA == "ship" && typeB == "rocket" {
+					l.server.onDestroyShip(userDataB.Owner, userDataA.ID)
+				}
+				if typeA == "rocket" && typeB == "ship" {
+					l.server.onDestroyShip(userDataB.ID, userDataA.Owner)
+				}
 			}
 		}
 	}
