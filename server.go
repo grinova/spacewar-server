@@ -29,12 +29,12 @@ type systemProps struct {
 // Server - сервер игры
 type Server struct {
 	physicsnet.Server
-	clients map[string]struct{}
+	clients map[string]string
 }
 
 // Start - запуск сервера
 func (server *Server) Start() {
-	server.clients = make(map[string]struct{})
+	server.clients = make(map[string]string)
 	listener := physicsnet.ServerListener{
 		OnServerStart: func(s *physicsnet.Server) {
 			s.Props.NewID = func() (string, error) {
@@ -71,7 +71,7 @@ func (server *Server) Start() {
 			if props, ok := shipProps[id]; ok {
 				s.CreateEntity(id, "ship", props)
 				c.SendSystemMessage(systemProps{Type: "user-name", Data: id})
-				server.clients[id] = struct{}{}
+				server.clients[id] = ""
 				log.Printf("Client connect: id = %s\n", id)
 				return nil
 			}
@@ -87,6 +87,25 @@ func (server *Server) Start() {
 			return true
 		},
 		OnSystemMessage: func(s *physicsnet.Server, id string, m interface{}) bool {
+			if data, ok := m.(map[string]interface{}); ok {
+				if data["type"] == "player-name" {
+					if opponentName, ok := data["data"].(string); ok {
+						server.clients[id] = opponentName
+						if len(server.clients) > 1 {
+							opponent := s.GetClient(id)
+							for clientID, client := range server.clients {
+								if clientID != id {
+									c := s.GetClient(clientID)
+									if c != nil {
+										c.SendSystemMessage(systemProps{Type: "opponent-join", Data: opponentName})
+									}
+									opponent.SendSystemMessage(systemProps{Type: "opponent-join", Data: client})
+								}
+							}
+						}
+					}
+				}
+			}
 			log.Printf("System from %s: %s\n", id, m)
 			return true
 		},
